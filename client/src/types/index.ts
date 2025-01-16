@@ -5,7 +5,7 @@ export interface appProps{
 }
 
 export interface SignUpInfo{
-    name:string | null;
+    name?:string | null;
     email:string | null;
     password:string;
     profilePicture?:string | null

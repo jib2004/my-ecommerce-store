@@ -21,8 +21,15 @@ export const userAuthApi = createApi({
                 method:"Post",
                 body
             })
+        }),
+        login:builder.mutation<SignUpInfo,Partial<SignUpInfo>>({
+            query:(body)=>({
+                url:'/login',
+                method:'POST',
+                body
+            })
         })
     })
 })
 
-export const {useSignUpMutation,useGoogleAuthMutation} =userAuthApi
+export const {useSignUpMutation,useGoogleAuthMutation,useLoginMutation} =userAuthApi
