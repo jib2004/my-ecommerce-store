@@ -10,35 +10,48 @@ import nodemailer from 'nodemailer'
   const authRouter = express.Router()
 authRouter.post('/register', async(req,res)=>{
     const {name,email,password,phoneNumber,address,avater,role,otp,isVerified,searchHistory} = req.body
-    if(!name || !email || !password || !phoneNumber){
+    if(!name || !email || !password ){
         return res.status(400).json({message:"Please fill all the fields"})
     }
     if(password?.length < 8) return res.status(400).json({messge:"Password too short"})
-    if(email) return res.status(400).json({message:"User exists already"})
-    
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const hashedNumber = await bcrypt.hash(phoneNumber,10)
+        
+    const hashedPassword =  bcrypt.hashSync(password, 10)
+    let hashedNumber =  ""
+    if(hashedNumber){
+        return    hashedNumber = bcrypt.hashSync(phoneNumber,10)
+    }
     let hashedAddress =""
+
     if(address){
-        hashedAddress = await bcrypt.hash(address,10)
+       return  hashedAddress =  bcrypt.hashSync(address,10)
     }
 
-    const user = await userModel.create({
-        name,
-        email,
-        password:hashedPassword,
-        phoneNumber:hashedNumber,
-        address:hashedAddress ,
-        avater,
-        role,
-        otp,
-        isVerified,
-        searchHistory
-    })
+    try {
+        const userEmail = await userModel.findOne({email})
+        if(userEmail) return res.status(400).json({message:"User exists already"})
+        const user = await userModel.create({
+            name,
+            email,
+            password:hashedPassword,
+            phoneNumber:hashedNumber,
+            address:hashedAddress ,
+            avater,
+            role,
+            otp,
+            isVerified,
+            searchHistory
+        })
+    
+        return res.status(201).json({ 
+            message:"User created successfully",
+        })
 
-    return res.status(201).json({ 
-        message:"User created successfully",
-    })
+
+    } catch (error) {
+        return res.status(500).json({message:`Internal server error ${error}`})
+    }
+
+    
 })
 
 authRouter.post('/login',async(req,res)=>{

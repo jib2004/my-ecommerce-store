@@ -26,10 +26,6 @@ const userSchema = new Schema({
         type:String,
         default:""
     },
-    avatar:{
-        type:String,
-        default:"default.jpg"
-    },
     role:{
         type:String,
         enum:["user","admin"],
