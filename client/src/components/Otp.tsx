@@ -182,8 +182,8 @@ export default function OTPInput() {
   const [isDisabled, setDisabled] = React.useState(false);
   const email = useAppSelector(state => state.user.email)
   const navigate = useNavigate() 
-  const [confirmOtp,{isLoading}] = useVerifyOTPPasswordMutation() 
-  const verifyOtp = async(code)=>{
+  const [confirmOtp] = useVerifyOTPPasswordMutation() 
+  const verifyOtp = async(code:string)=>{
     setDisabled(true) 
     try {
     const res = await confirmOtp({
@@ -194,7 +194,7 @@ export default function OTPInput() {
     setTimeout(() => {
       setDisabled(false)
     }, 4000);
-    navigate('/login')
+    navigate('/change-password')
     } catch (error) {
       toast.error(error.message)
       setDisabled(false)

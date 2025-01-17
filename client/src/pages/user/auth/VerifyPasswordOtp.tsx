@@ -1,4 +1,3 @@
-import React from 'react'
 import { useAppSelector } from '../../../hooks/hooks'
 import { maskEmail } from '../../../lib/maskEmail'
 import OTPInput from '../../../components/Otp'
@@ -11,13 +10,11 @@ const VerifyPasswordOtp = () => {
     const email = useAppSelector(state => state.user.email)
     const maskedEmail = maskEmail(email)
     const [sendOtp ] = useSendOTPMutation()
+
     const resendOtp =async()=>{
         try{
             const response = await sendOtp({email}).unwrap()
             toast.success(response.message)
-            
-
-
         }catch(e){
             toast.error(e.message)
         }

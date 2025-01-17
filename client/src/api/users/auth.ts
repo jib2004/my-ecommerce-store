@@ -49,8 +49,15 @@ export const userAuthApi = createApi({
                 method:'POST',
                 body
             })
+        }),
+        changePassword:builder.mutation<SignUpInfo,Partial<SignUpInfo>>({
+            query:(body)=>({
+                url:'/forgot-password',
+                method:"PUT",
+                body
+            })
         })
     })
 })
 
-export const {useSignUpMutation,useGoogleAuthMutation,useLoginMutation,useSendOTPMutation,useVerifyOTPPasswordMutation,useVerifyOTPEmailMutation} =userAuthApi
+export const {useSignUpMutation,useGoogleAuthMutation,useLoginMutation,useSendOTPMutation,useVerifyOTPPasswordMutation,useVerifyOTPEmailMutation,useChangePasswordMutation} =userAuthApi

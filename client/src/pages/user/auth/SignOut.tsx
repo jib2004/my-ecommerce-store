@@ -124,8 +124,6 @@ const SignUp = () => {
 
       </form>
 
-
-
       <div className='flex  items-center gap-3'> <div className='border h-[1px] basis-[50%]'></div> <span >or</span>  <div className='border h-[1px] basis-[50%]'></div></div>
 
 
