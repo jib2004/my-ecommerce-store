@@ -89,6 +89,7 @@ try{
 }
 
   userEmail.otp = token
+  userEmail.isChangedPassword = false
   await userEmail.save()
 
   const transporter = nodemailer.createTransport({
@@ -120,7 +121,7 @@ const info = await transporter.sendMail({
     
 })
 
-authRouter.post("/verify-otp",async(req,res)=>{
+authRouter.post("/verify-otp-email",async(req,res)=>{
     const {email,otp} = req.body
     try{
         const userEmail = await userModel.findOne({email}) 
@@ -148,7 +149,35 @@ authRouter.post("/verify-otp",async(req,res)=>{
         }
     }
     }catch(e){
-        return res.status(500).json({message:"Internal server error"})
+        return res.status(500).json({message:`Internal server error ${e}`})
+    }
+})
+
+
+authRouter.put('/verify-otp-password',async(req,res)=>{
+    const {email,otp}  = req.body
+    try{
+        const user = await userModel.findOne({email})
+        if(!user){
+            return res.status(404).json({message:"User not found"})
+        }
+        if(user.otp !== otp){
+            return res.status(400).json({message:"Invalid OTP"})
+        }
+        if(user.otp === otp){
+            const updateEmail = await userModel.findOneAndUpdate({email},{
+                otp: "",
+                isChangedPassword: true
+            },{new:true}
+        )
+    
+        if(updateEmail.isChangedPassword){
+            return res.status(200).json({message:"Password changed successfully"})
+        }
+    }
+            
+    }catch(error){
+        return res.status(500).json({message:`Internal server error: ${error}`})
     }
 })
 

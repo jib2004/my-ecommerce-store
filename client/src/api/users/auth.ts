@@ -28,8 +28,29 @@ export const userAuthApi = createApi({
                 method:'POST',
                 body
             })
+        }),
+        sendOTP:builder.mutation<SignUpInfo,Partial<SignUpInfo>>({
+            query:(body)=>({
+                url:'/send-otp',
+                method:'POST',
+                body
+            })
+        }),
+        verifyOTPPassword:builder.mutation<SignUpInfo,Partial<SignUpInfo>>({
+            query:(body)=>({
+                url:'/verify-otp-password',
+                method:'PUT',
+                body
+            })
+        }),
+        verifyOTPEmail:builder.mutation<SignUpInfo,Partial<SignUpInfo>>({
+            query:(body)=>({
+                url:'/verify-otp-email',
+                method:'POST',
+                body
+            })
         })
     })
 })
 
-export const {useSignUpMutation,useGoogleAuthMutation,useLoginMutation} =userAuthApi
+export const {useSignUpMutation,useGoogleAuthMutation,useLoginMutation,useSendOTPMutation,useVerifyOTPPasswordMutation,useVerifyOTPEmailMutation} =userAuthApi

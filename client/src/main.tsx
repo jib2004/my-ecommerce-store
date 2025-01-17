@@ -9,6 +9,8 @@ import SignUp from './pages/user/auth/SignOut.tsx';
 
 import { store } from './store.ts';
 import { Provider } from 'react-redux';
+import ForgotPassword from './pages/user/auth/ForgotPassword.tsx';
+import VerifyPasswordOtp from './pages/user/auth/VerifyPasswordOtp.tsx';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +24,14 @@ const router = createBrowserRouter([
     {
       path: '/login',
       element: <Login />,
+    },
+    {
+      path:'/forgotten-password',
+      element:<ForgotPassword/>,
+    },
+    {
+      path: '/verify-otp-password',
+      element:<VerifyPasswordOtp/>
     }
 ])
 

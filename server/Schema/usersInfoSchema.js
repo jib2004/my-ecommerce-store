@@ -39,6 +39,10 @@ const userSchema = new Schema({
         type:Boolean,
         default:false
     },
+    isBlocked:{
+        type:Boolean,
+        default:false
+    },
     searchHistory:{
         type:Array,
         default:[],
@@ -54,6 +58,14 @@ const userSchema = new Schema({
     profilePicture:{
         type:String,
         default:"default.jpg"
+    },
+    isChangedPassword:{
+        type:Boolean,
+        default:false
+    },
+    orders:{
+        type:Array,
+        default:[],
     }
 
 },{
