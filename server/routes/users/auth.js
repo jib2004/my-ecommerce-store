@@ -221,5 +221,6 @@ authRouter.post('/google-auth',async(req,res)=>{
         return res.status(500).json({message:`Internal server error: ${error}`})
     }
 })
+console.log("Wow")
 
 export default authRouter
