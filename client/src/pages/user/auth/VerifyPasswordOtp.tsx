@@ -1,4 +1,3 @@
-import { useAppSelector } from '../../../hooks/hooks'
 import { maskEmail } from '../../../lib/maskEmail'
 import OTPInput from '../../../components/Otp'
 import { Link } from 'react-router'
@@ -7,16 +6,18 @@ import { toast, Toaster } from 'sonner'
 
 
 const VerifyPasswordOtp = () => {
-    const email = useAppSelector(state => state.user.email)
+    const email = localStorage.getItem("email")
     const maskedEmail = maskEmail(email)
     const [sendOtp ] = useSendOTPMutation()
 
+    console.log(email)
     const resendOtp =async()=>{
         try{
             const response = await sendOtp({email}).unwrap()
             toast.success(response.message)
         }catch(e){
-            toast.error(e.message)
+            // toast.error(e.message)
+            console.log(e.message)
         }
     }
    

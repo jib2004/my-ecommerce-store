@@ -3,10 +3,12 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { userAuthApi } from './api/users/auth'
 import  userSliceReducer  from './api/userSlice/userSlice'
 
+
 export const store = configureStore({
     reducer:{
         [userAuthApi.reducerPath]:userAuthApi.reducer,
-        user:userSliceReducer
+        user:userSliceReducer,
+
 
         
     },

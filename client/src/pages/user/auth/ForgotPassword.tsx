@@ -3,13 +3,11 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Link,useNavigate } from 'react-router';
 import { SignUpInfo } from '../../../types';
 import { toast,Toaster } from 'sonner';
-import { useAppDispatch } from '../../../hooks/hooks';
 import { useSendOTPMutation } from '../../../api/users/auth';
-import { setEmailForPasswordChange } from '../../../api/userSlice/userSlice';
+
 
 
 const ForgotPassword = () => {
-  const dispatch = useAppDispatch();
   const [sendOtp,{isLoading}] = useSendOTPMutation() 
     const navigate = useNavigate()
     const [isDisabled, setDisabled] = useState(false);
@@ -22,7 +20,7 @@ const ForgotPassword = () => {
       setDisabled(true) 
       try {
       const res = await sendOtp(data).unwrap()
-      dispatch(setEmailForPasswordChange(data.email))
+      localStorage.setItem("email",data.email)
       toast(res?.data.message)
       setTimeout(() => {
         setDisabled(false)

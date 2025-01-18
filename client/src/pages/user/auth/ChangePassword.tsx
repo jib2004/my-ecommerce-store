@@ -5,7 +5,7 @@ import { SignUpInfo } from '../../../types';
 import { toast,Toaster } from 'sonner';
 import { FaEyeSlash,FaEye} from "react-icons/fa";
 import { useChangePasswordMutation } from '../../../api/users/auth';
-import { useAppSelector } from '../../../hooks/hooks';
+
 
 const ChangePassword = () => {
     const navigate = useNavigate()
@@ -13,7 +13,7 @@ const ChangePassword = () => {
 
     const [showPassword, setShowPassword] = useState(false);
     const [isDisabled, setDisabled] = useState(false);
-    const email = useAppSelector(state => state.user.email)
+    const email = localStorage.getItem("email")
    
 
     const { register, handleSubmit, formState: { errors } } = useForm<SignUpInfo>();
@@ -25,6 +25,7 @@ const ChangePassword = () => {
             password: data.password,
           }).unwrap()
           toast(res?.message)
+          localStorage.removeItem("email")
           setTimeout(() => {
             setDisabled(false)
           }, 4000);

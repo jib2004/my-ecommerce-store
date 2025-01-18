@@ -4,8 +4,7 @@ import { Box, styled } from '@mui/system';
 import { useVerifyOTPPasswordMutation } from '../api/users/auth';
 import { useNavigate } from 'react-router';
 import { Toaster,toast } from 'sonner';
-import { setEmailForPasswordChange } from ' ../api/userSlice/userSlice';
-import { useAppSelector } from '../hooks/hooks';
+
 
 function OTP({
   separator,
@@ -180,7 +179,7 @@ function OTP({
 export default function OTPInput() {
   const [otp, setOtp] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(false);
-  const email = useAppSelector(state => state.user.email)
+  const email = localStorage.getItem("email")
   const navigate = useNavigate() 
   const [confirmOtp] = useVerifyOTPPasswordMutation() 
   const verifyOtp = async(code:string)=>{
@@ -191,12 +190,14 @@ export default function OTPInput() {
         otp: code
     }).unwrap()
     toast(res?.message)
+    
+    navigate('/change-password')
     setTimeout(() => {
       setDisabled(false)
     }, 4000);
-    navigate('/change-password')
+    
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.data.message)
       setDisabled(false)
     }finally{
       setDisabled(false)

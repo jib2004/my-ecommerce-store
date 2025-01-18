@@ -192,7 +192,7 @@ authRouter.put('/forgot-password',async(req,res)=>{
         const user = await userModel.findOneAndUpdate({email},{
             password:newHashedPassword
         },{new:true})
-        if(user && user.isVerified){
+        if(user && user.isChangedPassword){
             return res.status(200).json({message:"Password updated successfully",data:user})
         }
 
