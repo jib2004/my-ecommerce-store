@@ -11,11 +11,16 @@ const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
   },
 }));
 
-export default function Cart() {
+type cartProp={
+  cart: number | undefined
+}
+
+
+export default function Cart({cart}:cartProp) {
   return (
     <IconButton aria-label="cart"  className='size-6'>
-      <StyledBadge badgeContent={4} color={'info'}>
-        <ShoppingCartIcon sx={{color:"black"}}/>
+      <StyledBadge badgeContent={cart} color={'info'}>
+        <ShoppingCartIcon sx={{color:"black",width:35,height:35}}/>
       </StyledBadge>
     </IconButton>
   );

@@ -5,7 +5,10 @@ import { SignUpInfo } from '../../types'
 
 export const userAuthApi = createApi({
     reducerPath: 'userAuthApi',
-    baseQuery: fetchBaseQuery({baseUrl:"http://localhost:5000/auth/"}),
+    baseQuery: fetchBaseQuery({
+        baseUrl:"http://localhost:5000/auth/",
+        credentials:'include'// Add so your cookies and credentials can be stored
+    }),
     tagTypes: ['User'],
     endpoints: (builder) => ({
         signUp: builder.mutation<SignUpInfo,Partial<SignUpInfo>>({
@@ -56,8 +59,36 @@ export const userAuthApi = createApi({
                 method:"PUT",
                 body
             })
+        }),
+        logout:builder.mutation({
+            query:()=>({
+                url:'/logout',
+                method:'POST',
+
+            })
+        }),
+        userDetailsUpdate:builder.mutation<SignUpInfo,Partial<SignUpInfo>>({
+            query:({id,body})=>({
+                url:`/user/${id}`,
+                method:"PUT",
+                body
         })
+    }),
+    userCreatePlan:builder.mutation({
+        query:(body)=>({
+            url:`/create-plan`,
+            method:"POST",
+            body
+        })
+    }),
+    userVerificationPayment : builder.mutation({
+        query:(body)=>({
+            url:'/payment-verification',
+            method:"POST",
+            body
+        })
+    }),
     })
 })
 
-export const {useSignUpMutation,useGoogleAuthMutation,useLoginMutation,useSendOTPMutation,useVerifyOTPPasswordMutation,useVerifyOTPEmailMutation,useChangePasswordMutation} =userAuthApi
+export const {useSignUpMutation,useGoogleAuthMutation,useLoginMutation,useSendOTPMutation,useVerifyOTPPasswordMutation,useVerifyOTPEmailMutation,useChangePasswordMutation,useLogoutMutation,useUserDetailsUpdateMutation,useUserCreatePlanMutation,useUserVerificationPaymentMutation} = userAuthApi

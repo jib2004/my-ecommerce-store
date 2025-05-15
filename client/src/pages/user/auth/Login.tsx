@@ -8,6 +8,8 @@ import { toast,Toaster } from 'sonner';
 import { GoogleAuthProvider,signInWithPopup } from "firebase/auth";
 import { auth } from '../../../config/firebaseConfig';
 import { useLoginMutation,useGoogleAuthMutation } from '../../../api/users/auth';
+import { useAppDispatch } from '../../../hooks/hooks';
+import { getUserDetails } from '../../../api/userSlice/userSlice';
 
 const Login = () => {
   const [login] = useLoginMutation() 
@@ -15,22 +17,27 @@ const Login = () => {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [isDisabled, setDisabled] = useState(false);
+  const dispatch = useAppDispatch()
  
 
 
   const { register, handleSubmit, formState: { errors } } = useForm<SignUpInfo>();
   const onSubmit: SubmitHandler<SignUpInfo> = async(data) =>{
-    
+    setDisabled(true)
     try {
     const res = await login(data).unwrap()
-    toast(res?.data.message)
-    setDisabled(true)
+    //  toast(res?.message)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          l.message)
+    
+      dispatch(getUserDetails(res.data))
     setTimeout(() => {
       setDisabled(false)
     }, 4000);
     navigate('/')
     } catch (error) {
       toast.error(error.data.message)
+      // console.log(error)
+    }finally{
+      setDisabled(false)
     }
     
   };
@@ -47,14 +54,15 @@ const Login = () => {
       profilePicture: result.user.photoURL
     }).unwrap()
     toast(res?.data.message)
+    dispatch(getUserDetails(res.data))
   
   setTimeout(() => {
     setDisabled(false)
   }, 4000);
   navigate('/')
     } catch (error) {
-      // toast.error(error)
-      console.log(error)
+      toast.error(error)
+      console.log(error.data.message)
     }finally{
       setDisabled(false)
     }

@@ -4,17 +4,25 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { generateToken } from '../../middleware/otpGenerator.js'
 import nodemailer from 'nodemailer'
+import { verify } from '../../middleware/verify.js'
+import axios from 'axios'
+import moment from 'moment'
+import { payment_model } from '../../Schema/paymentModel.js'
+import { upload } from '../../middleware/multer.js'
+import { imageUrlUploader } from '../../middleware/imageUrlConverter.js'
+import { StatusCodes } from 'http-status-codes'
 
 
 
   const authRouter = express.Router()
-authRouter.post('/register', async(req,res)=>{
-    const {name,email,password,phoneNumber,address,avater,role,otp,isVerified,searchHistory} = req.body
+authRouter.post('/register', upload.array('profile',1) ,async(req,res)=>{
+    const {name,email,password,phoneNumber,address} = req.body
+    let file = undefined
     if(!name || !email || !password ){
         return res.status(400).json({message:"Please fill all the fields"})
     }
     if(password?.length < 8) return res.status(400).json({messge:"Password too short"})
-        
+    
     const hashedPassword =  bcrypt.hashSync(password, 10)
     let hashedNumber =  ""
     if(hashedNumber){
@@ -26,6 +34,14 @@ authRouter.post('/register', async(req,res)=>{
        return  hashedAddress =  bcrypt.hashSync(address,10)
     }
 
+    if(req.files.length !== 0){
+         file = imageUrlUploader(req.files)
+    }else{
+        file = "https://media.istockphoto.com/id/1451587807/vector/user-profile-icon-vector-avatar-or-person-icon-profile-picture-portrait-symbol-vector.jpg?s=612x612&w=0&k=20&c=yDJ4ITX1cHMh25Lt1vI1zBn2cAKKAlByHBvPJ8gEiIg="
+    }
+
+    
+
     try {
         const userEmail = await userModel.findOne({email})
         if(userEmail) return res.status(400).json({message:"User exists already"})
@@ -35,15 +51,13 @@ authRouter.post('/register', async(req,res)=>{
             password:hashedPassword,
             phoneNumber:hashedNumber,
             address:hashedAddress ,
-            avater,
-            role,
-            otp,
-            isVerified,
-            searchHistory
+            profilePicture:file[0],
+            
         })
     
         return res.status(201).json({ 
             message:"User created successfully",
+            data:user
         })
 
 
@@ -87,7 +101,7 @@ try{
     if(!userEmail){
         return res.status(404).json({message:"User not found"})
 }
-
+    
   userEmail.otp = token
   userEmail.isChangedPassword = false
   await userEmail.save()
@@ -95,7 +109,7 @@ try{
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465, 
-secure: true,
+    secure: true,
     auth:{
         user: process.env.EMAIL,
         pass:process.env.PASSWORD
@@ -110,9 +124,13 @@ const info = await transporter.sendMail({
     
 })
  .catch(e=>console.log(e))
+ 
 
 
-    return res.status(200).json({message:"OTP sent successfully",data:userEmail})
+    return res.status(200).json({message:"OTP sent successfully",data:{
+        email:userEmail.email,
+        otp:userEmail.otp
+    }})
     
 }catch{
     return res.status(500).json({message:"Internal server error"})
@@ -145,7 +163,10 @@ authRouter.post("/verify-otp-email",async(req,res)=>{
         },{new:true})
     
         if(updateEmail.isVerified){
-            return res.status(200).json({message:"OTP verified successfully",data:updateEmail})
+            return res.status(200).json({message:"OTP verified successfully",data:{
+                email:updateEmail.email,
+                otp:userEmail.otp
+            }})
         }
     }
     }catch(e){
@@ -172,7 +193,7 @@ authRouter.put('/verify-otp-password',async(req,res)=>{
         )
     
         if(updateEmail.isChangedPassword){
-            return res.status(200).json({message:"Password changed successfully"})
+            return res.status(200).json({message:"OTP successfully"})
         }
     }
             
@@ -193,7 +214,10 @@ authRouter.put('/forgot-password',async(req,res)=>{
             password:newHashedPassword
         },{new:true})
         if(user && user.isChangedPassword){
-            return res.status(200).json({message:"Password updated successfully",data:user})
+            return res.status(200).json({message:"Password updated successfully",data:{
+                email:user.email,
+                password:user.password
+            }})
         }
 
     } catch (error) {
@@ -207,7 +231,7 @@ authRouter.post('/google-auth',async(req,res)=>{
     try {
         const user = await userModel.findOne({email})
         if(user){
-            const token =jwt.sign({userEmail:user.email},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
+            const token =jwt.sign({userEmail:user.email,userId:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"24h" })
             res.cookie("token",token,{
                 httpOnly:true,
             }).json({message:"Successfully logged in",data:user})
@@ -215,11 +239,214 @@ authRouter.post('/google-auth',async(req,res)=>{
             const newUser = await userModel.create({name,email,profilePicture})
             return res.status(201).json({ 
                 message:"User created successfully",
+                data:user
             })
         }
     } catch (error) {
         return res.status(500).json({message:`Internal server error: ${error}`})
     }
+})
+
+
+authRouter.put('/user/:id',async(req,res)=>{
+    const {id} = req.params
+    // const files = req.files
+    const {name,email,plan,phoneNumber,address,searchHistory,cart,wishlist,order,isSeller} = req.body
+    // let file = undefined
+    try {
+    //     if(files?.length !== 0){
+    //         file = imageUrlUploader(files)
+    //    }else{
+    //        file = "https://media.istockphoto.com/id/1451587807/vector/user-profile-icon-vector-avatar-or-person-icon-profile-picture-portrait-symbol-vector.jpg?s=612x612&w=0&k=20&c=yDJ4ITX1cHMh25Lt1vI1zBn2cAKKAlByHBvPJ8gEiIg="
+    //    }
+        const user = await userModel.findByIdAndUpdate(id,{
+            name,
+            email,
+            // profilePicture,
+            plan,
+            phoneNumber,
+            address, 
+            searchHistory,
+            cart,
+            wishlist,
+            order,
+            isSeller
+        },{
+            new:true
+        })
+        if(user){
+            return res.status(200).json({message:"User updated successfully",data:user})
+        }else{
+            return res.status(404).json({message:"User not found"})
+        }
+        
+    } catch (error) {
+        return res.status(500).json({message:`Internal server error: ${error}`})
+    }
+})
+
+authRouter.delete('/user/:id',verify,async(req,res)=>{
+    const {id} = req.params
+    try {
+        const user = await userModel.findByIdAndDelete(id)
+        if(user){
+            return res.status(StatusCodes.OK).json({message:"User updated successfully",data:user})
+        }else{
+            return res.status(StatusCodes.NOT_FOUND).json({message:"User not found"})
+        }
+
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({message:`Internal server error: ${error}`})
+    }
+})
+
+// Route to create a Paystack plan
+authRouter.post('/create-plan',verify ,async (req, res) => {
+    let {email,plan,amount} = req.body
+    const params = {
+        email:email,
+        plan: plan ,
+        amount:amount * 100 ,
+    };
+
+    try {
+        const response = await axios.post('https://api.paystack.co/transaction/initialize', params, {
+            headers: {
+                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`}, // Replace with your actual secret key
+                'Content-Type': 'application/json'
+                
+            });
+        const {reference,authorization_url}  =  response.data.data
+
+        const user = await userModel.findOneAndUpdate({email},{
+            'subscription.reference':reference,
+            'subscription.authorization_url':authorization_url,
+            'subscription.amount':amount ,
+        },{
+            new:true
+        })
+        if(!user){
+            return res.status(404).json({message:"User not found"})
+        }
+
+        if (response.data.status){
+            res.status(200).json({
+                message: "Plan created successfully Kindly Make payment",
+                data:response.data,
+                user:user
+            })
+        }else{
+            res.status(400).json({message: "Failed to create plan", data: response.data})
+        }
+
+       
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while making the request:' + error  });
+    }
+});
+
+
+authRouter.post('/payment-verification',verify,async (req,res)=>{
+    const {reference,email} = req.body
+
+    if(!reference || !email){
+        return res.status(404).json({message:"Reference or Email not found"})
+    }
+
+
+
+    try {
+        const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
+            headers: {
+                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, // Replace with your actual secret key
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const transactionData = response.data.data;
+
+        if (transactionData.status === 'success') {
+            // Payment was successful
+            const user = await userModel.findOneAndUpdate({email},{
+                'subscription.isSubscriptionActive':true,
+                'subscription.gateway_response':transactionData.gateway_response,
+                'subscription.status':transactionData.status,
+                'subscription.id':transactionData.id,
+                'subscription.amount':transactionData.amount/100,
+                'subscription.paidAt':transactionData.paidAt,
+                'subscription.createdAt':transactionData.createdAt,
+                'subscription.expiresAt':moment().add(30,'days').calendar(),
+                plan:transactionData.plan_object.name
+            },{
+                new:true
+            })
+
+            if(!user){
+                return res.status(404).json({message:"User not found"})
+            }
+
+            // if(user.subscription.expiresAt)
+            
+            let payment = await payment_model.findOneAndUpdate({userId:user._id},{
+                $push:{
+                    transactionHistory:transactionData
+                }
+            },{new:true})
+
+            if(!payment){
+                payment = await payment_model.create({
+                    userId:user._id,
+                    transactionHistory:[transactionData]
+                    
+                })
+            }
+
+
+             res.status(200).json({
+                message: "Transaction was successful",
+                // data: transactionData,
+                data:user,
+                paymentData:payment
+            })
+            // Update your database accordingly
+        } else {
+            // Payment was not successful
+            const user = await userModel.findOne({email})
+            if(!user){
+                return res.status(404).json({message:"User not found"})
+            }
+            let payment = await payment_model.findOneAndUpdate({userId:user._id},{
+                $push:{
+                    transactionHistory:transactionData
+                }
+            },{new:true})
+
+            if(!payment){
+                payment = await payment_model.create({
+                    userId:user._id,
+                    transactionHistory:[transactionData]
+                    
+                })
+            } 
+            res.status(400).json({
+                message: transactionData.gateway_response,
+                data: transactionData,
+                paymentData:payment
+            })
+        }
+    } catch (error) {
+        console.error('Error verifying payment:', error.response ? error.response.data : error.message);
+    }
+
+})
+
+
+
+
+authRouter.post('/logout',(req,res)=>{
+    res.clearCookie("token")
+    return res.status(200).json({message:"Logged out successfully"})
 })
 
 

@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { userDetails } from "../../types";
 
 const initialState:userDetails={
+    _id:'',
     name:'',
     email:'',
     phoneNumber:'',
@@ -14,6 +15,7 @@ const initialState:userDetails={
     cart:[],
     wishlist:[],
     orders:[],
+    message:''
 }
 
 export const userSlice = createSlice({
@@ -21,15 +23,18 @@ export const userSlice = createSlice({
     initialState,
     reducers:{
         getUserDetails:(state,action)=>{
-            state=action.payload;
+           return state = action.payload;
         },
         setEmailForPasswordChange:(state,action)=>{
-            state.email=action.payload;
+           return  state.email=action.payload;
+        },
+        logout:()=>{
+            return initialState;
         }
         
     }
     
 })
 
-export const {getUserDetails,setEmailForPasswordChange} = userSlice.actions
+export const {getUserDetails,setEmailForPasswordChange,logout} = userSlice.actions
 export default userSlice.reducer

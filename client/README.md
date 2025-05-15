@@ -48,3 +48,11 @@ export default tseslint.config({
   },
 })
 ```
+
+
+imagekit.io
+https://ik.imagekit.io/oh0nz2rge/path/to/myimage.jpg
+ImageKit ID:oh0nz2rge
+
+
+https://paystack.com/pay/5a33nfh3ll

@@ -12,8 +12,27 @@ import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 
-export default function AccountMenu() {
+import { useLogoutMutation } from '../api/users/auth';
+import {persistor} from '../store' 
+import { logout } from '../api/userSlice/userSlice';
+import { useAppDispatch,useAppSelector } from '../hooks/hooks';
+
+import {  useNavigate,useLocation } from 'react-router';
+
+type  avatarProp ={
+  name?: string ,
+  src?: string,
+  isSeller?:boolean
+
+}
+
+export default function AccountMenu({name,src}:avatarProp) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const navigate = useNavigate()
+  const [logoutMutation] = useLogoutMutation()
+  const user = useAppSelector(state => state.user)
+  const dispatch = useAppDispatch()
+  const {pathname} = useLocation() 
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -22,11 +41,36 @@ export default function AccountMenu() {
     setAnchorEl(null);
   };
 
-
-  function stringAvatar(name: string) {
-    console.log(name)
+   async function logOut() {
     
-    return `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
+    try {
+      await logoutMutation('').unwrap();
+      dispatch(logout())
+      persistor.purge()
+      setAnchorEl(null)
+      navigate('/')
+    } catch (error) {
+      console.log(error)
+    }
+    
+    
+  }
+
+
+  const seller = () =>{
+    const users =  user.isSeller ? navigate('/dashboard') : navigate('/plans')
+    setAnchorEl(null)
+    return users
+  }
+
+  const goHome = () =>{
+    navigate('/')
+    setAnchorEl(null)
+  }
+
+
+  function stringAvatar(name: string | undefined) {
+    if(name) return `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
   }
 
 
@@ -34,16 +78,15 @@ export default function AccountMenu() {
     <React.Fragment>
       <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
    
-        <Tooltip title="Account settings">
+        <Tooltip title="">
           <IconButton
             onClick={handleClick}
             size="small"
-            sx={{ ml: 2 }}
             aria-controls={open ? 'account-menu' : undefined}
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}>{stringAvatar('Kent Dodds')}</Avatar>
+            <Avatar sx={{ width: 35, height: 35 }} alt='user profile picture' src={src ? src : ''}>{!src ?stringAvatar(name) : '' }</Avatar>
           </IconButton>
         </Tooltip>
       </Box>
@@ -85,11 +128,30 @@ export default function AccountMenu() {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem onClick={handleClose}>
-          <Avatar /> Profile
+           Profile
         </MenuItem>
         <MenuItem onClick={handleClose}>
-          <Avatar /> My account
+           My account
         </MenuItem>
+
+        <MenuItem onClick={handleClose}>
+           Wishlist
+        </MenuItem>
+
+        <MenuItem onClick={handleClose}>
+           Orders
+        </MenuItem>
+
+        <MenuItem onClick={seller}>
+           {user.isSeller ? 'Dashboard' :  'Register to be a seller'}
+        </MenuItem>
+
+        {!pathname.includes('dashboard') || !pathname.includes('seller') && 
+        <MenuItem onClick={goHome}>
+        Go to homepage 
+        </MenuItem>
+        }
+        
         <Divider />
         <MenuItem onClick={handleClose}>
           <ListItemIcon>
@@ -103,7 +165,7 @@ export default function AccountMenu() {
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={logOut}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>

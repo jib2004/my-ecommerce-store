@@ -3,22 +3,22 @@ import {Schema,model} from "mongoose";
 const userSchema = new Schema({
     name:{
         type:String,
-        required:true,
+        require:true,
         min:3
     },
     email:{
         type:String,
-        required:true,
+        require:true,
         unique:true,
     },
     password:{
         type:String,
-        // required:true,
+        // require:true,
         min:8
     },
     phoneNumber:{
         type:String,
-        // required:true,
+        // require:true,
         default:"",
         max:11
     },
@@ -44,28 +44,75 @@ const userSchema = new Schema({
         default:false
     },
     searchHistory:{
-        type:Array,
+        type:[String],
         default:[],
     },
     cart:{
-        type:Array,
+        type:[Object],
         default:[],
     },
     wishlist:{
-        type:Array,
+        type:[Object],
         default:[],
     },
     profilePicture:{
         type:String,
-        default:"default.jpg"
+        
     },
     isChangedPassword:{
         type:Boolean,
         default:false
     },
     orders:{
-        type:Array,
+        type:[Object],
         default:[],
+    },
+    isSeller:{
+        type:Boolean,
+        default:false
+    },
+    CAC:{
+        type:String,
+        default:""
+    },
+    isCACLegit:{
+        type:Boolean,
+        default:false
+    },
+    plan:{
+        type:String,
+        enum:['free', 'basic','standard',''],
+        default:""
+    },
+    subscription:{
+        type:Object,
+        default:{
+            isSubscriptionActive:false,
+            id:0,
+            status:'',
+            reference:'',
+            amount:0,
+            currency:'NGN',
+            authorization_url:'',
+            gateway_response:'',
+            createdAt:'',
+            paidAt:'',
+            expiresAt:'',
+        }
+    },
+    sales:{
+        type:[Object],
+        default:[]
+    },
+    wallet:{
+        type:Object,
+        default:{
+            balance:0,
+            currency:"NGN",
+            lastTransaction: "",
+            lastTransactionDate: "",
+            lastTransactionAmount: 0
+            }
     }
 
 },{

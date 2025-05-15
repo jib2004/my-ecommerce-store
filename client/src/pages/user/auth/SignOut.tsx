@@ -9,11 +9,14 @@ import { useSignUpMutation,useGoogleAuthMutation } from '../../../api/users/auth
 import { toast,Toaster } from 'sonner';
 import { GoogleAuthProvider,signInWithPopup } from "firebase/auth";
 import { auth } from '../../../config/firebaseConfig';
+import { useAppDispatch } from '../../../hooks/hooks';
+import { getUserDetails } from '../../../api/userSlice/userSlice';
 
 
 const SignUp = () => {
   const [signUp, { isLoading, isError, error }] = useSignUpMutation();
   const[googleSignUp] =useGoogleAuthMutation()
+  const dispatch = useAppDispatch()
 
   
   const navigate = useNavigate()
@@ -35,6 +38,7 @@ const SignUp = () => {
       setDisabled(false)
     }, 4000);
     navigate('/')
+    dispatch(getUserDetails(res.data))
     } catch (error) {
       toast.error(error.data.message)
     }
@@ -52,12 +56,13 @@ const SignUp = () => {
       email:result.user.email,
       profilePicture: result.user.photoURL
     }).unwrap()
-    toast(res?.data.message)
-  
+    toast(res?.message)
+    
   setTimeout(() => {
     setDisabled(false)
   }, 4000);
-  navigate('/')
+  
+  navigate('/login')
     } catch (error) {
       // toast.error(error)
       console.log(error)
